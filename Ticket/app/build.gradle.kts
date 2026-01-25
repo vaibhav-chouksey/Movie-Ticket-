@@ -17,6 +17,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms.google.services)
 
 }
 
@@ -72,6 +73,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.runtime)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.compose.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -89,5 +92,9 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0") // Use Coil if using Jetpack Compose
     //coil
     implementation("io.coil-kt:coil-compose:2.4.0")
+    // REQUIRED FOR GOOGLE SIGN IN (Credential Manager)
+    implementation("androidx.credentials:credentials:1.2.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
 
 }
