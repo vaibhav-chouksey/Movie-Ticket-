@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.ticket.view.screen.AuthScreen
 import com.example.ticket.view.screen.HomeScreen
 import com.example.ticket.view.screen.MovieDetailScreen
 import kotlin.jvm.java
@@ -16,7 +17,12 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     // 1. START DESTINATION IS "home"
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "login") {
+
+        composable("login") {
+            // Clean: No ViewModel passing needed here!
+            AuthScreen(navController = navController)
+        }
 
         // 2. THIS ROUTE MUST ALSO BE "home"
         composable("home") {

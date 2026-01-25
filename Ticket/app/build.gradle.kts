@@ -22,20 +22,20 @@ plugins {
 }
 
 android {
-    buildFeatures {
-        buildConfig = true
-    }
     namespace = "com.example.ticket"
-    compileSdk {
-        version = release(36)
-    }
+
+    // FIX 1: Use standard syntax and stable SDK 35 (Android 15)
+    compileSdk = 35
 
     defaultConfig {
         // We wrap the variable in escaped quotes: \"$variable\"
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
         applicationId = "com.example.ticket"
         minSdk = 24
-        targetSdk = 36
+
+        // FIX 2: Match targetSdk to compileSdk
+        targetSdk = 35
+
         versionCode = 1
         versionName = "1.0"
 
@@ -60,6 +60,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
