@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.ticket.ui.theme.AppNavigation
+import com.example.ticket.navigation.AppNavigation
 import com.example.ticket.ui.theme.TicketTheme
 import dagger.hilt.android.AndroidEntryPoint
 
