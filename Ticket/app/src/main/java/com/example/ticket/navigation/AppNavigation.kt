@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.ticket.view.screen.AuthScreen
+import com.example.ticket.view.screen.BookTicketScreen
 import com.example.ticket.view.screen.MainScreen
 import com.example.ticket.view.screen.MovieDetailScreen
 
@@ -38,7 +39,26 @@ fun AppNavigation() {
                 onBackClick = { rootNavController.popBackStack() },
                 onMovieClick = { newMovieId ->
                     rootNavController.navigate("movie_detail/$newMovieId")
+                },
+//                viewModel = TODO(),
+                onBookTicketClick = { id ->
+                    rootNavController.navigate("book_ticket/$id")
                 }
+            )
+        }
+
+        composable("book_ticket/{movieId}") { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getString("movieId")
+
+            // This is your new screen (we will create it next)
+            BookTicketScreen(
+                onPaymentSuccess = {
+                    // When done, go all the way back to Home
+                    rootNavController.navigate("main_app") {
+                        popUpTo("main_app") { inclusive = true }
+                    }
+                },
+                onBackClick = { rootNavController.popBackStack() }
             )
         }
     }

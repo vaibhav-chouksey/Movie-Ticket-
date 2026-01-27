@@ -44,7 +44,7 @@ fun AuthScreen(
         when (authState.value) {
             is AuthState.Authenticated -> {
                 // Navigate to Home and clear the login screen from history
-                navController.navigate("home") {
+                navController.navigate("main_app") {
                     popUpTo("login") { inclusive = true }
                 }
             }

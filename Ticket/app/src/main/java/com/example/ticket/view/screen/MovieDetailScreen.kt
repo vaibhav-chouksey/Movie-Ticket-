@@ -36,7 +36,8 @@ import java.util.Locale
 @Composable
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {} ,onMovieClick: (String) -> Unit
+    onBackClick: () -> Unit = {} ,onMovieClick: (String) -> Unit,
+    onBookTicketClick: (String) -> Unit
 ) {
     val movie = viewModel.movie.collectAsState().value
     val cast = viewModel.castList.collectAsState().value
@@ -235,7 +236,7 @@ fun MovieDetailScreen(
                 // --- 5. BOOK TICKET BUTTON ---
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = { onBookTicketClick("current_movie_id")},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
