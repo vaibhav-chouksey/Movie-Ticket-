@@ -4,6 +4,7 @@ import com.example.ticket.model.CreditsResponse
 import com.example.ticket.model.Movie
 import com.example.ticket.model.MovieDetail
 import com.example.ticket.model.MovieResponse
+import com.example.ticket.model.SearchResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -53,4 +54,10 @@ interface TmdbApi {
         @Path("movie_id") movieId: String,
         @Query("api_key") apiKey: String
     ): Response<CreditsResponse>
+
+    @GET("search/movie")
+    suspend fun searchMovies(
+        @Query("query") query: String,
+        @Query("api_key") apiKey: String // <--- Added this param
+    ): Response<SearchResponse>
 }

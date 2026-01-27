@@ -87,7 +87,12 @@ fun MainScreen(
             // --- TAB 2: SEARCH ---
             composable(BottomNavItem.Search.route) {
                 // val searchViewModel: SearchViewModel = hiltViewModel()
-                SearchScreen()
+                    SearchScreen(
+                        onMovieClick = { movieId ->
+                            // Navigates to the Detail Screen (hiding bottom bar)
+                            rootNavController.navigate("movie_detail/$movieId")
+                        }
+                    )
             }
 
             // --- TAB 3: BOOKMARK ---
