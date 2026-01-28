@@ -19,7 +19,7 @@ class SearchViewModel @Inject constructor(
     private val repository: MovieRepository
 ) : ViewModel() {
 
-    private val _searchQuery = MutableStateFlow("")
+    private val _searchQuery = MutableStateFlow("Action")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private val _searchResults = MutableStateFlow<List<MovieItem>>(emptyList())
@@ -29,6 +29,9 @@ class SearchViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private var searchJob: Job? = null
+    init {
+        onSearchQueryChanged("Action")
+    }
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
