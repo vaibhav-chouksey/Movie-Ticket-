@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.gms.google.services)
+//    id("com.google.devtools.ksp")
 
 }
 
@@ -101,6 +102,11 @@ dependencies {
     //matrl3
 
     implementation("androidx.compose.material:material-icons-extended")
+    val roomVersion = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion") // For Flow/Coroutines
+    ksp("androidx.room:room-compiler:$roomVersion") // Code Generator
 
 
 }
