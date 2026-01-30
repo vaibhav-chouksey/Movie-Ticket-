@@ -19,7 +19,7 @@ import com.example.ticket.view.component.SearchMovieCard
 import com.example.ticket.viewmodel.BookmarkViewModel
 
 @Composable
-fun BookmarkScreen(
+fun WatchListScreen(
     viewModel: BookmarkViewModel = hiltViewModel(),
     onMovieClick: (String) -> Unit
 ) {

@@ -98,7 +98,7 @@ fun MainScreen(
             // --- TAB 3: BOOKMARK ---
             composable(BottomNavItem.Bookmark.route) {
                 // UPDATE THIS PART:
-                BookmarkScreen(
+                WatchListScreen(
                     onMovieClick = { movieId ->
                         // Pass navigation up to the root controller to hide bottom bar
                         rootNavController.navigate("movie_detail/$movieId")
