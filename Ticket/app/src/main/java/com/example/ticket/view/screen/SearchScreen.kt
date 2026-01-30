@@ -78,8 +78,21 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
-                items(movieList) { movie ->
-                    SearchMovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
+                items(items = movieList) { movie ->
+                    SearchMovieCard(
+                        // 1. Matches 'title' from your screenshot
+                        title = movie.title,
+
+                        // 2. Matches 'posterUrl' from your screenshot
+                        posterUrl = movie.posterUrl,
+
+                        // 3. Matches 'rating' (String) from your screenshot.
+                        // We convert it to Double because the Card expects a number.
+                        rating = movie.rating.toDoubleOrNull() ?: 0.0,
+
+                        // 4. Matches 'id' (String) from your screenshot
+                        onClick = { onMovieClick(movie.id) }
+                    )
                 }
             }
         }

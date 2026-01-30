@@ -1,5 +1,6 @@
 package com.example.ticket.view.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -10,11 +11,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,13 +40,17 @@ import java.util.Locale
 @Composable
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel = hiltViewModel(),
-    onBackClick: () -> Unit = {} ,onMovieClick: (String) -> Unit,
+    onBackClick: () -> Unit = {},
+    onMovieClick: (String) -> Unit,
     onBookTicketClick: (String) -> Unit
 ) {
     val movie = viewModel.movie.collectAsState().value
     val cast = viewModel.castList.collectAsState().value
     val recommendations = viewModel.recommendations.collectAsState().value
     val isLoading = viewModel.isLoading.collectAsState().value
+
+    // Observe Bookmark State
+    val isBookmarked by viewModel.isBookmarked.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
         if (isLoading || movie == null) {
@@ -56,9 +64,8 @@ fun MovieDetailScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                // --- 1. HEADER SECTION (Backdrop + Poster) ---
+                // --- 1. HEADER SECTION ---
                 Box(modifier = Modifier.height(300.dp)) {
-                    // Backdrop
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data("https://image.tmdb.org/t/p/w780${movie.backdrop_path}")
@@ -69,7 +76,6 @@ fun MovieDetailScreen(
                         modifier = Modifier.fillMaxWidth().height(250.dp)
                     )
 
-                    // Dark Gradient Overlay (For readability)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -82,7 +88,7 @@ fun MovieDetailScreen(
                             )
                     )
 
-                    // Back Button
+                    // Back Button Only
                     IconButton(
                         onClick = onBackClick,
                         modifier = Modifier
@@ -120,7 +126,6 @@ fun MovieDetailScreen(
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Title
                     Text(
                         text = movie.name,
                         style = MaterialTheme.typography.headlineMedium,
@@ -128,7 +133,6 @@ fun MovieDetailScreen(
                         color = Color.Black
                     )
 
-                    // Rating & Date
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -150,7 +154,6 @@ fun MovieDetailScreen(
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.LightGray.copy(alpha = 0.5f))
 
-                    // Overview
                     Text(text = "Storyline", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -185,7 +188,7 @@ fun MovieDetailScreen(
                                     model = ImageRequest.Builder(LocalContext.current)
                                         .data("https://image.tmdb.org/t/p/w200${actor.profilePath}")
                                         .crossfade(true)
-                                        .placeholder(android.R.drawable.ic_menu_gallery) // Basic placeholder
+                                        .placeholder(android.R.drawable.ic_menu_gallery)
                                         .error(android.R.drawable.ic_menu_report_image)
                                         .build(),
                                     contentDescription = actor.name,
@@ -209,7 +212,7 @@ fun MovieDetailScreen(
                     }
                 }
 
-                // --- 4. RECOMMENDATIONS SECTION ---
+                // --- 4. RECOMMENDATIONS ---
                 if (recommendations.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
@@ -225,18 +228,19 @@ fun MovieDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(recommendations) { recMovie ->
-                            // Ensure MovieCard has a fixed width if it doesn't already
                             Box(modifier = Modifier.width(140.dp)) {
-                                MovieCard(movie = recMovie, onClick = { onMovieClick(recMovie.id.toString())})
+                                MovieCard(movie = recMovie, onClick = { onMovieClick(recMovie.id.toString()) })
                             }
                         }
                     }
                 }
 
-                // --- 5. BOOK TICKET BUTTON ---
+                // --- 5. ACTION BUTTONS (BOOK & BOOKMARK) ---
                 Spacer(modifier = Modifier.height(32.dp))
+
+                // BUTTON 1: BOOK TICKET
                 Button(
-                    onClick = { onBookTicketClick("current_movie_id")},
+                    onClick = { onBookTicketClick(movie.id.toString()) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
@@ -246,6 +250,44 @@ fun MovieDetailScreen(
                 ) {
                     Text(text = "Book Ticket", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
+
+                Spacer(modifier = Modifier.height(12.dp)) // Spacing between buttons
+
+                // BUTTON 2: BOOKMARK / WATCHLIST
+                if (isBookmarked) {
+                    // IF SAVED: Show "Remove" button (Red Outline)
+                    OutlinedButton(
+                        onClick = { viewModel.toggleBookmark(movie) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, Color.Red),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                    ) {
+                        Icon(Icons.Default.Bookmark, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Remove from Watchlist", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                } else {
+                    // IF NOT SAVED: Show "Add" button (Primary Color Outline)
+                    OutlinedButton(
+                        onClick = { viewModel.toggleBookmark(movie) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(Icons.Default.BookmarkBorder, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Add to Watchlist", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(50.dp))
             }
         }
