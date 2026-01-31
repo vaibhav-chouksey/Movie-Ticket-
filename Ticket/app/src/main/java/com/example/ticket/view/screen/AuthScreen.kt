@@ -1,7 +1,6 @@
 package com.example.ticket.view.screen
 
 import android.widget.Toast
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel // IMPT: Add this import
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ticket.viewmodel.AuthState
 import com.example.ticket.viewmodel.AuthViewModel
@@ -28,7 +27,6 @@ import com.example.ticket.viewmodel.AuthViewModel
 @Composable
 fun AuthScreen(
     navController: NavController,
-    // SELF INJECTION: Logic is handled here automatically
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     // 1. STATE VARIABLES
@@ -39,14 +37,23 @@ fun AuthScreen(
     val authState = viewModel.authState.observeAsState()
     val context = LocalContext.current
 
-    // 2. LISTEN FOR SUCCESS/ERROR
+    // 2. LISTEN FOR SUCCESS/ERROR & NAVIGATE
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Authenticated -> {
-                // Navigate to Home and clear the login screen from history
-                navController.navigate("main_app") {
-                    popUpTo("login") { inclusive = true }
+                if (isLoginMode) {
+                    // CASE A: User Logged In -> Go to Main App
+                    navController.navigate("main_app") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                } else {
+                    // CASE B: User Just Signed Up -> Go to Profile Setup
+                    navController.navigate("profile_setup") {
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
+                // Optional: Reset state to avoid loops if you come back
+                // viewModel.resetState()
             }
             is AuthState.Error -> {
                 Toast.makeText(context, (authState.value as AuthState.Error).message, Toast.LENGTH_SHORT).show()

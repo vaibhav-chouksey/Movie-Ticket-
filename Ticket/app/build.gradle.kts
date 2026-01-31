@@ -1,16 +1,17 @@
 import java.util.Properties
 
-// 1. Create a variable to hold the properties
+// --- 1. LOAD PROPERTIES ONCE (Top of file) ---
 val localProperties = Properties()
-
-// 2. Load the file
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
 }
 
-// 3. Extract the key (or provide a blank default to prevent crashes if missing)
+// --- 2. EXTRACT KEYS SAFELY ---
+// If the key is missing in local.properties, it defaults to an empty string "" to prevent build crashes
 val tmdbApiKey = localProperties.getProperty("tmdb.api.key") ?: ""
+val razorpayKeyId = localProperties.getProperty("RAZORPAY_KEY_ID") ?: ""
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,29 +19,25 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.gms.google.services)
-//    id("com.google.devtools.ksp")
-
 }
 
 android {
     namespace = "com.example.ticket"
-
-    // FIX 1: Use standard syntax and stable SDK 35 (Android 15)
     compileSdk = 35
 
     defaultConfig {
-        // We wrap the variable in escaped quotes: \"$variable\"
-        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
         applicationId = "com.example.ticket"
         minSdk = 24
-
-        // FIX 2: Match targetSdk to compileSdk
         targetSdk = 35
-
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // --- 3. INJECT KEYS INTO BUILD CONFIG ---
+        // Note: We wrap the values in escaped quotes like "\"value\"" so they appear as Strings in Java/Kotlin
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
+        buildConfigField("String", "RAZORPAY_KEY_ID", "\"$razorpayKeyId\"")
     }
 
     buildTypes {
@@ -61,9 +58,10 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
+        buildConfig = true // <--- IMPORTANT: This MUST be true
     }
 }
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -107,6 +105,12 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion") // For Flow/Coroutines
     ksp("androidx.room:room-compiler:$roomVersion") // Code Generator
+
+    //firebae
+    implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
+
+    //razorpay
+    implementation("com.razorpay:checkout:1.6.33")
 
 
 }

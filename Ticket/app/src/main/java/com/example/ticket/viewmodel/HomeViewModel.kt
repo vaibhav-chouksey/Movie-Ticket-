@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(private val api: TmdbApi) : ViewModel() 
 
     private fun fetchHomeData() {
         viewModelScope.launch {
-            val apiKey = "3a98302ee481b37dc0696c1cadb3cfb1"
+            val apiKey = ApiKey.key
 
             try {
                 // --- A. FETCH NOW PLAYING ---

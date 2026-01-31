@@ -211,30 +211,6 @@ fun MovieDetailScreen(
                         }
                     }
                 }
-
-                // --- 4. RECOMMENDATIONS ---
-                if (recommendations.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "You might also like",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(recommendations) { recMovie ->
-                            Box(modifier = Modifier.width(140.dp)) {
-                                MovieCard(movie = recMovie, onClick = { onMovieClick(recMovie.id.toString()) })
-                            }
-                        }
-                    }
-                }
-
                 // --- 5. ACTION BUTTONS (BOOK & BOOKMARK) ---
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -287,6 +263,31 @@ fun MovieDetailScreen(
                         Text(text = "Add to Watchlist", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
+
+                // --- 4. RECOMMENDATIONS ---
+                if (recommendations.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "You might also like",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(recommendations) { recMovie ->
+                            Box(modifier = Modifier.width(140.dp)) {
+                                MovieCard(movie = recMovie, onClick = { onMovieClick(recMovie.id.toString()) })
+                            }
+                        }
+                    }
+                }
+
+
 
                 Spacer(modifier = Modifier.height(50.dp))
             }

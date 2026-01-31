@@ -19,41 +19,59 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ticket.MainActivity
+import com.example.ticket.viewmodel.BookTicketViewModel
+import com.example.ticket.viewmodel.BookingState
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// --- DATA CLASSES ---
+// --- DATA CLASSES (Ensure these are here) ---
 data class Seat(val id: Int, val status: SeatStatus)
 enum class SeatStatus { AVAILABLE, SELECTED, BOOKED }
 
 @Composable
 fun BookTicketScreen(
-    onPaymentSuccess: () -> Unit,
-    onBackClick: () -> Unit
+    onBookingComplete: () -> Unit,
+    onBackClick: () -> Unit,
+    viewModel: BookTicketViewModel = hiltViewModel()
 ) {
-    // --- STATE ---
+    // 1. CONTEXT & VIEWMODEL STATE
+    val context = LocalContext.current
+    val bookingState by viewModel.bookingState.collectAsState()
+
+    // 2. UI STATE (Seats, Dates, Price)
+    // We need to bring these back so 'totalPrice' exists!
+    val ticketPrice = 250.00
+    val selectedSeats = remember { mutableStateListOf<Int>() }
+
+    // THE MISSING VARIABLE IS HERE:
+    val totalPrice = selectedSeats.size * ticketPrice
+
     val totalSeats = remember {
         List(42) { id ->
             val isBooked = id in listOf(2, 3, 8, 9, 25, 26, 35)
             Seat(id, if (isBooked) SeatStatus.BOOKED else SeatStatus.AVAILABLE)
         }
     }
-
-    val selectedSeats = remember { mutableStateListOf<Int>() }
     var selectedDateIndex by remember { mutableStateOf(0) }
     var selectedTimeIndex by remember { mutableStateOf(0) }
+    val dates = remember { getNext7Days() } // Ensure getNext7Days() helper is in the file or Utils
 
-    val ticketPrice = 250.00
-
-    // Generate dates using standard Calendar
-    val dates = remember { getNext7Days() }
+    // 3. LISTEN FOR SUCCESS (Architecture Part)
+    LaunchedEffect(bookingState) {
+        if (bookingState is BookingState.Success) {
+            onBookingComplete()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -63,14 +81,17 @@ fun BookTicketScreen(
             ) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.size(40.dp).background(Color.White, CircleShape).border(1.dp, Color.LightGray, CircleShape)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, CircleShape)
+                        .border(1.dp, Color.LightGray, CircleShape)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text("Select Seats", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text("Iron Man 3 • King Class", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
             }
         },
@@ -89,20 +110,32 @@ fun BookTicketScreen(
                     Column {
                         Text("Total Price", color = Color.Gray, fontSize = 14.sp)
                         Text(
-                            text = "₹${String.format("%.2f", selectedSeats.size * ticketPrice)}",
+                            text = "₹${String.format("%.2f", totalPrice)}",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
+
+                    // --- INDUSTRY LEVEL BUTTON ---
                     Button(
-                        onClick = onPaymentSuccess,
-                        enabled = selectedSeats.isNotEmpty(),
+                        onClick = {
+                            if (context is MainActivity) {
+                                // Now 'totalPrice' is recognized because we defined it above
+                                context.startPayment(totalPrice)
+                            }
+                        },
+                        // Disable button if loading or no seats selected
+                        enabled = selectedSeats.isNotEmpty() && bookingState !is BookingState.Loading,
                         modifier = Modifier.height(54.dp).width(180.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        Text("Buy Ticket", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        if (bookingState is BookingState.Loading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        } else {
+                            Text("Pay & Book", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
@@ -115,8 +148,9 @@ fun BookTicketScreen(
                 .background(Color(0xFFF5F5F5))
                 .padding(horizontal = 16.dp)
         ) {
+            // --- RE-USE YOUR EXISTING UI COMPONENTS ---
 
-            // --- 1. DATE SELECTOR (Standard Dates) ---
+            // 1. Date Selector
             Spacer(modifier = Modifier.height(16.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(dates.size) { index ->
@@ -128,7 +162,7 @@ fun BookTicketScreen(
                 }
             }
 
-            // --- 2. TIME SELECTOR ---
+            // 2. Time Selector
             Spacer(modifier = Modifier.height(24.dp))
             val times = listOf("10:00 AM", "12:30 PM", "03:00 PM", "06:15 PM", "09:00 PM")
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -141,12 +175,12 @@ fun BookTicketScreen(
                 }
             }
 
-            // --- 3. CINEMA SCREEN ---
+            // 3. Screen Visual
             Spacer(modifier = Modifier.height(40.dp))
             CinemaScreenVisual()
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- 4. SEATS ---
+            // 4. Seat Grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(6),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -166,7 +200,7 @@ fun BookTicketScreen(
                 }
             }
 
-            // --- 5. LEGEND ---
+            // 5. Legend
             Spacer(modifier = Modifier.height(24.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 LegendItem(color = Color.White, text = "Available", hasBorder = true)
@@ -176,10 +210,6 @@ fun BookTicketScreen(
         }
     }
 }
-
-// --- HELPER FUNCTIONS & COMPOSABLES ---
-
-// 1. STANDARD DATE GENERATOR
 fun getNext7Days(): List<Date> {
     val calendar = Calendar.getInstance()
     val dates = mutableListOf<Date>()

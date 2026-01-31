@@ -108,7 +108,7 @@ fun MainScreen(
 
             // --- TAB 4: PROFILE ---
             composable(BottomNavItem.Profile.route) {
-                ProfileScreen(onLogout = {
+                ProfileScreen(onLogoutSuccess = {
                     // Use ROOT controller to go back to Login
                     rootNavController.navigate("login") {
                         popUpTo(0)
