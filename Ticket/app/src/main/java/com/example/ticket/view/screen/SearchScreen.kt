@@ -1,30 +1,26 @@
 package com.example.ticket.view.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ticket.view.component.SearchMovieCard
 import com.example.ticket.viewmodel.SearchViewModel
@@ -37,6 +33,10 @@ fun SearchScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val movieList by viewModel.searchResults.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // Get the genres and selected state
+    val genres = viewModel.genres
+    val selectedGenre by viewModel.selectedGenre.collectAsState()
 
     Column(
         modifier = Modifier
@@ -61,7 +61,36 @@ fun SearchScreen(
             )
         )
 
-        // --- 2. LOADING OR GRID ---
+        // --- 2. HORIZONTAL GENRE TABS (ADDED BACK) ---
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            items(genres) { genre ->
+                val isSelected = genre == selectedGenre
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                        .border(
+                            width = 1.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+                            shape = RoundedCornerShape(50)
+                        )
+                        .clickable { viewModel.onGenreSelected(genre) }
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = genre,
+                        color = if (isSelected) Color.White else Color.Black,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        // --- 3. LOADING OR GRID ---
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -73,24 +102,16 @@ fun SearchScreen(
         } else {
             // THE 2-COLUMN GRID
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // <--- HORIZONTALLY 2
+                columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
                 items(items = movieList) { movie ->
                     SearchMovieCard(
-                        // 1. Matches 'title' from your screenshot
                         title = movie.title,
-
-                        // 2. Matches 'posterUrl' from your screenshot
                         posterUrl = movie.posterUrl,
-
-                        // 3. Matches 'rating' (String) from your screenshot.
-                        // We convert it to Double because the Card expects a number.
                         rating = movie.rating.toDoubleOrNull() ?: 0.0,
-
-                        // 4. Matches 'id' (String) from your screenshot
                         onClick = { onMovieClick(movie.id) }
                     )
                 }
@@ -98,4 +119,3 @@ fun SearchScreen(
         }
     }
 }
-
