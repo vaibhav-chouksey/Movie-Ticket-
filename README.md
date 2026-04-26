@@ -9,45 +9,27 @@
 
 ---
 
-## 📱 App Preview
 
-## 📸 Screenshots
+
+## 📱 App Preview
 
 <div align="center">
 
-### 🏠 Home
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/home_png" width="700"/>
+| 🏠 Home Dashboard | 🎬 Movie Details | 🪑 Seat Selection |
+|:---:|:---:|:---:|
+| <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/home_.png" width="220"/> | <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/movie_detail_.jpg" width="220"/> | <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/seatbooking_.jpg" width="220"/> |
 
----
+<br/>
 
-### 🎬 Movie Detail
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/movie_detail_jpg" width="700"/>
-
----
-
-### 👤 Profile
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/profile_jpg" width="700"/>
-
----
-
-### 🔍 Search
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/search_jpg" width="700"/>
-
----
-
-### 🪑 Seat Booking
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/seatbooking_jpg" width="700"/>
-
----
-
-### 📋 Watchlist
-<img src="https://github.com/vaibhav-chouksey/Movie-Ticket-/raw/main/Screenshots/watchlist_jpg" width="700"/>
-
-</div>
+| 🔍 Smart Search | 📋 Personal Watchlist | 👤 User Profile |
+|:---:|:---:|:---:|
+| <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/search_.jpg" width="220"/> | <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/watchlist_.jpg" width="220"/> | <img src="https://raw.githubusercontent.com/vaibhav-chouksey/Movie-Ticket-/main/Screenshots/profile_.jpg" width="220"/> |
 
 > *Experience a fluid UI with glassmorphism effects and smooth transitions.*
 
----
+</div>
+
+</div>
 
 ## ✨ Key Features
 
