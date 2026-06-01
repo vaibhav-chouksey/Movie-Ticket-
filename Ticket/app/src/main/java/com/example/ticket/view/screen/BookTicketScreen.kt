@@ -30,11 +30,10 @@ import com.example.ticket.viewmodel.BookingState
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-// --- DATA CLASSES (Ensure these are here) ---
+// --- DATA CLASSES ---
 data class Seat(val id: Int, val status: SeatStatus)
 enum class SeatStatus { AVAILABLE, SELECTED, BOOKED }
 
@@ -46,15 +45,17 @@ fun BookTicketScreen(
 ) {
     // 1. CONTEXT & VIEWMODEL STATE
     val context = LocalContext.current
+    
+    // Hoisted States collected from ViewModel
     val bookingState by viewModel.bookingState.collectAsState()
+    val movieDetail by viewModel.movieDetail.collectAsState()
+    val selectedSeats by viewModel.selectedSeats.collectAsState()
+    val selectedDateIndex by viewModel.selectedDateIndex.collectAsState()
+    val selectedTimeIndex by viewModel.selectedTimeIndex.collectAsState()
+    val totalPrice by viewModel.totalPrice.collectAsState()
 
-    // 2. UI STATE (Seats, Dates, Price)
-    // We need to bring these back so 'totalPrice' exists!
-    val ticketPrice = 250.00
-    val selectedSeats = remember { mutableStateListOf<Int>() }
-
-    // THE MISSING VARIABLE IS HERE:
-    val totalPrice = selectedSeats.size * ticketPrice
+    val dates = viewModel.dates
+    val times = viewModel.times
 
     val totalSeats = remember {
         List(42) { id ->
@@ -62,11 +63,8 @@ fun BookTicketScreen(
             Seat(id, if (isBooked) SeatStatus.BOOKED else SeatStatus.AVAILABLE)
         }
     }
-    var selectedDateIndex by remember { mutableStateOf(0) }
-    var selectedTimeIndex by remember { mutableStateOf(0) }
-    val dates = remember { getNext7Days() } // Ensure getNext7Days() helper is in the file or Utils
 
-    // 3. LISTEN FOR SUCCESS (Architecture Part)
+    // 2. LISTEN FOR SUCCESS
     LaunchedEffect(bookingState) {
         if (bookingState is BookingState.Success) {
             onBookingComplete()
@@ -91,7 +89,11 @@ fun BookTicketScreen(
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text("Select Seats", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text("Iron Man 3 • King Class", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(
+                        text = "${movieDetail?.name ?: "Loading..."} • King Class",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                 }
             }
         },
@@ -110,18 +112,16 @@ fun BookTicketScreen(
                     Column {
                         Text("Total Price", color = Color.Gray, fontSize = 14.sp)
                         Text(
-                            text = "₹${String.format("%.2f", totalPrice)}",
+                            text = "₹${String.format(Locale.getDefault(), "%.2f", totalPrice)}",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
 
-                    // --- INDUSTRY LEVEL BUTTON ---
                     Button(
                         onClick = {
                             if (context is MainActivity) {
-                                // Now 'totalPrice' is recognized because we defined it above
                                 context.startPayment(totalPrice)
                             }
                         },
@@ -148,8 +148,6 @@ fun BookTicketScreen(
                 .background(Color(0xFFF5F5F5))
                 .padding(horizontal = 16.dp)
         ) {
-            // --- RE-USE YOUR EXISTING UI COMPONENTS ---
-
             // 1. Date Selector
             Spacer(modifier = Modifier.height(16.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -157,20 +155,19 @@ fun BookTicketScreen(
                     DateCard(
                         date = dates[index],
                         isSelected = selectedDateIndex == index,
-                        onClick = { selectedDateIndex = index }
+                        onClick = { viewModel.selectDate(index) }
                     )
                 }
             }
 
             // 2. Time Selector
             Spacer(modifier = Modifier.height(24.dp))
-            val times = listOf("10:00 AM", "12:30 PM", "03:00 PM", "06:15 PM", "09:00 PM")
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(times.size) { index ->
                     TimeChip(
                         time = times[index],
                         isSelected = selectedTimeIndex == index,
-                        onClick = { selectedTimeIndex = index }
+                        onClick = { viewModel.selectTime(index) }
                     )
                 }
             }
@@ -192,8 +189,7 @@ fun BookTicketScreen(
                         isSelected = selectedSeats.contains(seat.id),
                         onSeatClick = {
                             if (seat.status == SeatStatus.AVAILABLE) {
-                                if (selectedSeats.contains(seat.id)) selectedSeats.remove(seat.id)
-                                else selectedSeats.add(seat.id)
+                                viewModel.toggleSeat(seat.id)
                             }
                         }
                     )
@@ -210,21 +206,9 @@ fun BookTicketScreen(
         }
     }
 }
-fun getNext7Days(): List<Date> {
-    val calendar = Calendar.getInstance()
-    val dates = mutableListOf<Date>()
-
-    // Add today + next 6 days
-    for (i in 0 until 7) {
-        dates.add(calendar.time)
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
-    }
-    return dates
-}
 
 @Composable
 fun DateCard(date: Date, isSelected: Boolean, onClick: () -> Unit) {
-    // 2. STANDARD DATE FORMATTERS
     val dayFormatter = SimpleDateFormat("EEE", Locale.getDefault()) // "Mon"
     val numFormatter = SimpleDateFormat("dd", Locale.getDefault())  // "15"
 
@@ -258,8 +242,6 @@ fun DateCard(date: Date, isSelected: Boolean, onClick: () -> Unit) {
         }
     }
 }
-
-// ... (Other components like TimeChip, SeatComposable, LegendItem remain the same) ...
 
 @Composable
 fun TimeChip(time: String, isSelected: Boolean, onClick: () -> Unit) {

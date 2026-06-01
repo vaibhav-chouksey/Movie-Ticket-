@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ticket.data.local.entity.BookmarkEntity
 import com.example.ticket.data.remote.TmdbApi
+import com.example.ticket.model.ApiKey
 import com.example.ticket.model.Cast
 import com.example.ticket.model.Movie
 import com.example.ticket.model.MovieDetail
@@ -71,7 +72,7 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun loadMovieData(id: String) {
         viewModelScope.launch {
-            val apiKey = "3a98302ee481b37dc0696c1cadb3cfb1"
+            val apiKey = ApiKey.key
             _isLoading.value = true
 
             try {

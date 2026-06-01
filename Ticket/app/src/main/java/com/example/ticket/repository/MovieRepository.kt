@@ -1,6 +1,5 @@
 package com.example.ticket.repository
 
-import android.graphics.Movie
 import com.example.ticket.data.local.entity.BookmarkEntity
 import com.example.ticket.model.MovieResponse
 import com.example.ticket.model.SearchResponse
